@@ -1,5 +1,8 @@
 
+import json
+import http.cookiejar
 import requests
+import urllib.request as ur
 from utils.time_util import TimeUtil
 from utils.UserAgentMiddleware import UserAgentRotate
 
@@ -29,31 +32,44 @@ class DataSpider:
                "&dbcode=" + self._data_type + \
                "&rowcode=zb" + \
                "&colcode=sj" + \
-               "&wds=[]" + \
-               "&dfwds=[]" + \
+               "&wds=%5B%5D" + \
+               "&dfwds=%5B%5D" + \
                "&k1=" + str(self._t.millisecond_timestamp())
         return data
 
     def _headers(self, code, sj):
         header = {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Cookie": "JSESSIONID=E8C46D5E57DC44E277C4217BEA9EE862; u=2; _trs_uv=jbptw0bc_6_1eps; experience=show; td_cookie=18446744072380760463",
+            # "Cookie": "JSESSIONID=" + "93D5EF6A590E6C88484541C713421744" + "; u=1; _trs_uv=jbq43j3c_6_jy4b;",
+            "Cookie": "u=1; _trs_uv=jbq43j3c_6_jy4b; acmrAutoLoginUser=\"379978424@qq.com\"; acmrAutoSessionId=D63B7EAE94D941A4207DC1140B7DCA47; JSESSIONID=D63B7EAE94D941A4207DC1140B7DCA47",
             "User-Agent": self._ua.ua_generator()['User-Agent'],
             "Host": "data.stats.gov.cn",
-            "Referer": "http://data.stats.gov.cn/easyquery.htm?cn=C01&zb=" + code + "&sj=" + sj,
-            "X-Requested-With": "XMLHttpRequest"
+            "Referer": "http://data.stats.gov.cn/easyquery.htm?cn=C01&zb=" + code + "&sj=" + sj
         }
         print(header)
         return header
 
     def request(self):
-        url = "http://data.stats.gov.cn/easyquery.htm?" + self._post_data()
-        req = requests.get(url=url, headers=self._headers(code="A0301", sj="LAST20"))
+        cookie = http.cookiejar.CookieJar()
+        handler = ur.HTTPCookieProcessor(cookie)
+        opener = ur.build_opener(handler)
+
+        # page_url = "http://data.stats.gov.cn/easyquery.htm"
+        # req = ur.Request(method="POST", url=page_url, headers={'User_Agent': self._ua.ua_generator()['User-Agent']})
+        # html = ur.urlopen(req)
+        # session_id = html.getheader('Set-Cookie').split(";")[0].replace("JSESSIONID=", "")
+        # print(session_id)
+
+        data_url = "http://data.stats.gov.cn/easyquery.htm?" + self._post_data()
+        print(data_url)
+        req = ur.Request(method="POST", url=data_url, headers=self._headers(code="A0301", sj="LAST20"))
+        req.set_proxy(host="219.235.129.199:80", type="http")
+
         # print(json.dumps(req.json(), indent=2).encode('utf-8').decode('unicode_escape'))
+        response = opener.open(req, timeout=10)
+        json_res = response.read().decode("UTF-8")
 
         name_list = []
-        for name in req.json()['returndata']['wdnodes'][0]['nodes']:
+        for name in json.loads(json_res)['returndata']['wdnodes'][0]['nodes']:
             name_list.append(name['name'])
         print(name_list)
 
