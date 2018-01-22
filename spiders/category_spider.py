@@ -20,15 +20,15 @@ class CategorySpider:
         self._req = None
 
         # 数据类型 hgnd年度数据, hgjd季度数据, hgyd月度数据
-        data_type_list = ['hgnd', 'hgjd', 'hgyd']
-        if data_type not in data_type_list:
-            raise ValueError("Wrong data type")
         self._data_type = data_type
 
         # UserAgent生成器
         self._ua = UserAgentRotate()
 
-    def _post_data(self, _id="zb"):
+        # 父节点字典
+        self._parent_node_dict = {}
+
+    def _post_data(self, _id="zb") -> dict:
         """
         构造请求数据
         :param _id: 节点id
@@ -70,14 +70,22 @@ class CategorySpider:
         """
         json_res = self._req.json()
         for node in json_res:
-            # print(node)
-            # name = node['name']
-            # data_id = node['id']
             is_parent = node['isParent']
             if is_parent:
-                # 存在子节点的继续递归
+                # 存在子节点的继续递归 {node['name']: node['id']}
+                self._parent_node_dict = {"name": node['name'],
+                                          'id': node['id'],
+                                          'parent': "",
+                                          "data_type": self._data_type}
+                print("##############")
+                print(self._parent_node_dict)
                 self.req_data(data=self._post_data(_id=node['id']))
                 self.parse()
             else:
-                # 不存在则输出
-                print(node)
+                # 不存在则输出 {node['name']: node['id']}
+                node_dict = {"name": node['name'],
+                             'id': node['id'],
+                             'parent': self._parent_node_dict['id'],
+                             "data_type": self._data_type}
+                print(node_dict)
+                # self.node_list.append(node_dict)
