@@ -5,16 +5,20 @@ Created on 2018年1月15日
 """
 
 # 系统库
+import os
 import logging
 
 
 # 日志中心
 class Logger:
     def __init__(
-            self,
-            logger,
-            log_path="./nation_data_spider.log",
-            file_log_level="DEBUG",
+        self,
+        logger,
+        log_path=os.path.abspath('../LoggerHandler.py').replace(
+            'LoggerHandler.py',
+            '') +
+        "/nation_data_spider.log",
+        file_log_level="DEBUG",
             console_log_level="DEBUG"):
 
         # 创建一个logger
