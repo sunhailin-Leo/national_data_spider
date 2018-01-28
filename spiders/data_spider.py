@@ -27,7 +27,8 @@ class NationalDataWebsiteSpider:
                  pid: str,
                  data_type: str,
                  db_name="national_data",
-                 col_name="test_1"):
+                 col_name="test_1",
+                 time="1978-2016"):
         """
         :param pid: pid是爬取的表的id
         :param data_type: data_type是数据类型
@@ -43,7 +44,12 @@ class NationalDataWebsiteSpider:
 
         # URL的一些参数
         self._wds = up.quote("[]")
-        self._dfwds = up.quote('[{"wdcode":"zb","valuecode":"' + self._pid + '"}]')
+        self._time = time
+        self._dfwds = up.quote(
+            '[{"wdcode":"zb","valuecode":"' +
+            self._pid +
+            '"},{"wdcode": "sj", "valuecode": "' + self._time + '"}]')
+
         self._url = "http://data.stats.gov.cn/easyquery.htm" \
                     "?m=QueryData" \
                     "&dbcode=" + self._data_type + "" \
@@ -66,7 +72,8 @@ class NationalDataWebsiteSpider:
         self._util = Utils()
 
         # 初始化页面url
-        self.referer_url = "http://data.stats.gov.cn/easyquery.htm?cn=C01&zb=" + self._pid + "&valuecode=LAST20"
+        self.referer_url = "http://data.stats.gov.cn/easyquery.htm?cn=C01&zb=" + \
+            self._pid + "&valuecode=LAST20"
 
         # 初始化headers
         self.headers = None
@@ -108,7 +115,8 @@ class NationalDataWebsiteSpider:
             logger.debug(json_res['returndata'])
             sys.exit(1)
         if json_res is None:
-            logger.error("Request can not get the data return. Please try again later!")
+            logger.error(
+                "Request can not get the data return. Please try again later!")
             sys.exit(1)
 
         # 获取category名称和数据单位
@@ -152,5 +160,5 @@ class NationalDataWebsiteSpider:
 
 
 if __name__ == '__main__':
-    national = NationalDataWebsiteSpider(pid='12345', data_type='hgnd')
+    national = NationalDataWebsiteSpider(pid='A0101', data_type='hgnd')
     national.start_spider()
