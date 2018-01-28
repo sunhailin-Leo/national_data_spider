@@ -49,7 +49,7 @@ CREATE_YEAR_DATA_TABLE = "CREATE TABLE IF NOT EXISTS T_YEAR_DATA (" \
 
 
 # 数据源
-class DataSource:
+class Mysql:
     def __init__(
             self,
             host="127.0.0.1",
@@ -69,6 +69,10 @@ class DataSource:
         # 如果json_config 为True则不用看参数是多少了
         if json_config:
             config = self._load_config_from_json()
+            if config['Enable'] is False:
+                self.conn = None
+                return
+
             host = config['Host']
             port = config['Port']
             user = config['Username']
@@ -205,5 +209,5 @@ class DataSource:
 
 
 if __name__ == '__main__':
-    d = DataSource(json_config=True)
+    d = Mysql(json_config=True)
     print(d.conn)

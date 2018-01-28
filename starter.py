@@ -4,11 +4,14 @@ Created on 2017年12月28日
 @author: Leo
 """
 
+# Python内置库
 import sys
 import getopt
 
 # 项目内部库
 from db_connect.mgo import Mgo
+from db_connect.mysql import Mysql
+from db_connect.db_handler import DBHandler
 from utils.other_utils import Utils
 from logger.LoggerHandler import Logger
 from spiders.category_spider import CategorySpider
@@ -32,6 +35,36 @@ class Starter:
 
         # 工具类
         self._utils = Utils()
+
+        # 初始化数据库连接池
+        self.db_connect_pool = []
+
+        # 加载数据库
+        # # MongoDB
+        self._mgo = Mgo().conn
+        self._connect_info(conn_res=self._mgo, db_type="MongoDB")
+        # # MySQL
+        self._mysql = Mysql(json_config=True).conn
+        self._connect_info(conn_res=self._mysql, db_type="MySQL")
+        # 判断连接池的长度
+        if len(self.db_connect_pool) == 0:
+            logger.info("无数据源，无法存储.正在退出...")
+            sys.exit(1)
+
+    def _connect_info(self, conn_res, db_type: str):
+        """
+        检查数据库连接情况,并写入连接池
+        :param conn_res: 连接结果
+        :param db_type: 数据库类型名称
+        :return: 无返回值
+        """
+        if conn_res is not None:
+            logger.info("%s 数据库连接成功!" % db_type)
+            self.db_connect_pool.append(conn_res)
+            return True
+        else:
+            logger.info("%s 数据源没有启用,请检查配置文件或检查数据库连接情况!" % db_type)
+            return False
 
     def command(self):
         try:
@@ -67,8 +100,24 @@ class Starter:
         if self._utils.check_data_type(data_type=data_type):
             logger.info("开始分类爬虫...")
             self._category = CategorySpider(data_type="hgnd")
-            self._category.req_data()
-            self._category.parse()
+            try:
+                self._category.req_data()
+                self._category.parse()
+                result = self._category.node_list
+            except Exception as err:
+                logger.error(err)
+            else:
+                logger.info("分类总条数: %d 条" % len(result))
+                logger.info("爬取结束,数据开始入库...")
+                db = DBHandler(
+                    db_connect_pool=self.db_connect_pool,
+                    data_list=result,
+                    mgo_col_name="t_category",
+                    mysql_query="INSERT INTO t_category(category_name, category_id, category_parent, category_type) "
+                    "VALUES (%s, %s, %s, %s)"
+                )
+                db.insert_data()
+
         else:
             logger.error("Data type is error!")
             sys.exit(1)
@@ -82,7 +131,8 @@ class Starter:
         """
         if self._utils.check_data_type(data_type=data_type):
             logger.info("开始数据爬虫!...")
-            self._data_spider = NationalDataWebsiteSpider(pid=pid, data_type=data_type)
+            self._data_spider = NationalDataWebsiteSpider(pid=pid,
+                                                          data_type=data_type)
             self._data_spider.start_spider()
         else:
             logger.error("Data type or pid is error!")

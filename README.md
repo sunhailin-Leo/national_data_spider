@@ -5,6 +5,10 @@
 <h3 id="Process">进度</h3>
 
 * 进度
+    * 2018-01-28
+        * MySQL,MongoDB的写入都已经完成(分类爬虫,数据爬虫的待完成)
+        * MySQL和MongoDB双数据源可以通过conf/db.json中的Enable字段进行启用/关闭
+
     * 2018-01-24
         * 更新一部分代码
             * 解决此前的log文件位置不正确的问题
@@ -34,7 +38,7 @@
 
 # national_data_spider --- (根目录)
 ## conf --- (配置文件夹)
-## db_connect --- (数据库连接类,暂时只有MongoDB的配置)
+## db_connect --- (数据库连接类)
 ## logger --- (日志中心)
 ## spiders --- (爬虫类)
 ## utils --- (工具类)
@@ -50,6 +54,7 @@
 * 系统版本: Windows 10 x64
 * MongoDB数据库版本: MongoDB 3.4.6
 * Python库:
+    * pymysql：
     * pymongo: 3.6.0
     * requests: 2.18.4
 * 数据库暂时只支持MongoDB. MySQL会在下个版本支持
@@ -63,13 +68,13 @@
     python3 starter.py 
     
     # 接下来就是命令参数了
-    -c 或者 --category: 爬去分类的json存储到数据库
-    -i 或者 --pid: 获取某个id下的数据存储到数据库
+    -c 或者 --category: 爬去分类的json存储到数据库(功能已完善)
+    -i 或者 --pid: 获取某个id下的数据存储到数据库(暂时还有点鸡肋)
 ```
 
 <h3 id="Configuration">配置说明</h3>
 
-* 配置文件在conf文件夹中(目前仅支持配置在MongoDB数据库)
+* 配置文件在conf文件夹中(可以完全自定义MySQL和MongoDB)
 
 ---
 
@@ -81,6 +86,7 @@
 
 <h3 id="Future">后续开发</h3>
 
-* 后续完善MongoDB数据库的连接使用
-* 开发MySQL的连接
-* 分类爬虫数据支持写入到excel导出(目前仅输出到控制台)
+* ~~后续完善MongoDB数据库的连接使用~~
+* ~~开发MySQL的连接~~
+* 分类爬虫数据支持写入到excel导出(导出Excel这个待完成)
+* 数据爬虫的MySQL和MongoDB写入待完成

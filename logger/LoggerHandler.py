@@ -12,13 +12,12 @@ import logging
 # 日志中心
 class Logger:
     def __init__(
-        self,
-        logger,
-        log_path=os.path.abspath('../LoggerHandler.py').replace(
-            'LoggerHandler.py',
-            '') +
-        "/nation_data_spider.log",
-        file_log_level="DEBUG",
+            self,
+            logger,
+            log_path=os.path.abspath(__file__).replace(
+                'logger\LoggerHandler.py',
+                '') + "nation_data_spider.log",
+            file_log_level="DEBUG",
             console_log_level="DEBUG"):
 
         # 创建一个logger

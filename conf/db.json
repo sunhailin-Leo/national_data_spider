@@ -1,11 +1,14 @@
 {
     "MongoDB": {
+        "Enable": true,
         "Host": "127.0.0.1",
         "Port": 27017,
         "Username": "",
-        "Password": ""
+        "Password": "",
+        "Database": "national_data"
     },
     "MySQL": {
+        "Enable": true,
         "Host": "127.0.0.1",
         "Port": 3306,
         "Username": "root",

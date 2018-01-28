@@ -104,6 +104,9 @@ class NationalDataWebsiteSpider:
         :return: 无返回值
         """
         json_res = self._json_res
+        if json_res['returncode'] == 501:
+            logger.debug(json_res['returndata'])
+            sys.exit(1)
         if json_res is None:
             logger.error("Request can not get the data return. Please try again later!")
             sys.exit(1)
@@ -149,5 +152,5 @@ class NationalDataWebsiteSpider:
 
 
 if __name__ == '__main__':
-    national = NationalDataWebsiteSpider(pid='A0203', data_type='hgnd')
+    national = NationalDataWebsiteSpider(pid='12345', data_type='hgnd')
     national.start_spider()

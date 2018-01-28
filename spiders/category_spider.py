@@ -6,6 +6,7 @@ Created on 2017年12月28日
 
 # 内部库
 import requests
+from collections import OrderedDict
 
 # 项目内部库
 from utils.UserAgentMiddleware import UserAgentRotate
@@ -26,7 +27,9 @@ class CategorySpider:
         self._ua = UserAgentRotate()
 
         # 父节点字典
-        self._parent_node_dict = {}
+        self._parent_node_dict = OrderedDict()
+
+        self.node_list = []
 
     def _post_data(self, _id="zb") -> dict:
         """
@@ -73,19 +76,21 @@ class CategorySpider:
             is_parent = node['isParent']
             if is_parent:
                 # 存在子节点的继续递归 {node['name']: node['id']}
-                self._parent_node_dict = {"name": node['name'],
-                                          'id': node['id'],
-                                          'parent': "",
-                                          "data_type": self._data_type}
-                print("##############")
-                print(self._parent_node_dict)
+                self._parent_node_dict['category_name'] = node['name']
+                self._parent_node_dict['category_id'] = node['id']
+                self._parent_node_dict['category_parent'] = ""
+                self._parent_node_dict['category_type'] = self._data_type
+                # print("##############")
+                # print(self._parent_node_dict)
+                self.node_list.append(self._parent_node_dict)
                 self.req_data(data=self._post_data(_id=node['id']))
                 self.parse()
             else:
                 # 不存在则输出 {node['name']: node['id']}
-                node_dict = {"name": node['name'],
-                             'id': node['id'],
-                             'parent': self._parent_node_dict['id'],
-                             "data_type": self._data_type}
-                print(node_dict)
-                # self.node_list.append(node_dict)
+                node_dict = OrderedDict()
+                node_dict['category_name'] = node['name']
+                node_dict['category_id'] = node['id']
+                node_dict['category_parent'] = self._parent_node_dict['category_id']
+                node_dict['category_type'] = self._data_type
+                # print(node_dict)
+                self.node_list.append(node_dict)

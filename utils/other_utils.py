@@ -48,11 +48,3 @@ class Utils:
         else:
             logger.error("You give wrong type on data_type!")
             return False
-
-    def mgo_to_mysql(self, mongo_data) -> tuple:
-        """
-        将写入MongoDB的数据转换成mysql的形式
-        dict -> tuple
-        :return:
-        """
-        pass
