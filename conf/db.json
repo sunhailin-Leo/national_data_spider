@@ -1,6 +1,6 @@
 {
     "MongoDB": {
-        "Enable": false,
+        "Enable": true,
         "Host": "127.0.0.1",
         "Port": 27017,
         "Username": "",
@@ -8,7 +8,7 @@
         "Database": "national_data"
     },
     "MySQL": {
-        "Enable": false,
+        "Enable": true,
         "Host": "127.0.0.1",
         "Port": 3306,
         "Username": "root",
