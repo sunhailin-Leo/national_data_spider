@@ -99,7 +99,7 @@ class Starter:
         """
         if self._utils.check_data_type(data_type=data_type):
             logger.info("开始分类爬虫...")
-            self._category = CategorySpider(data_type="hgnd")
+            self._category = CategorySpider(data_type=data_type)
             try:
                 self._category.req_data()
                 self._category.parse()
@@ -119,8 +119,7 @@ class Starter:
                     )
                     db.insert_data()
                 else:
-                    logger.info("导出到Excel中...")
-                    logger.info("功能待开发...敬请期待")
+                    self._utils.export_category_to_file(data=result, file_name=data_type)
 
         else:
             logger.error("Data type is error!")
@@ -153,8 +152,7 @@ class Starter:
                     )
                     db.insert_data()
                 else:
-                    logger.info("导出到Excel中...")
-                    logger.info("功能待开发...敬请期待")
+                    self._utils.export_data_to_file(data=result[1], file_name=pid)
         else:
             logger.error("Data type or pid is error!")
             sys.exit(1)
