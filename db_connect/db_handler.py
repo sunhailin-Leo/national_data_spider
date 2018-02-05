@@ -18,6 +18,9 @@ from logger.LoggerHandler import Logger
 # 日志中心
 logger = Logger(logger='db_handler.py').get_logger()
 
+# 表名
+data_table_list = ['t_year_data', 't_month_data', 't_season_data']
+
 
 class DBHandler:
     def __init__(self,
@@ -79,8 +82,11 @@ class DBHandler:
         """
         try:
             col = mgo_conn[self._mgo_col_name]
-            col.insert_many(documents=[dict(data) for data in self._data],
-                            ordered=True)
+            if self._mgo_col_name in data_table_list:
+                col.insert_many(self._data[0])
+            else:
+                col.insert_many(documents=[dict(data) for data in self._data],
+                                ordered=True)
             logger.info("MongoDB数据写入完成")
         except Exception as err:
             logger.error(err)
@@ -92,13 +98,24 @@ class DBHandler:
         :return: 无返回值
         """
         if self._query is not None:
-            # 转换
-            insert_data = self.cast()
+            # 游标对象
             cursor = mysql_conn.cursor()
+            # 写入
             try:
-                execute_result = cursor.executemany(query=self._query, args=insert_data)
-                mysql_conn.commit()
-                logger.info("MySQL数据写入完成! 返回信息: %s" % str(execute_result))
+                if self._mgo_col_name not in data_table_list:
+                    # 转换
+                    insert_data = self.cast()
+                    execute_result = cursor.executemany(query=self._query, args=insert_data)
+                    mysql_conn.commit()
+                    logger.info("MySQL数据写入完成! 返回信息: %s" % str(execute_result))
+                else:
+                    insert_data = self._data[1]
+                    execute_result = ""
+                    for each_insert in insert_data:
+                        execute_result = cursor.executemany(query=self._query, args=each_insert)
+                        mysql_conn.commit()
+                    logger.info("MySQL数据写入完成! 返回信息: %s" % str(execute_result))
+
             except Exception as err:
                 logger.error(err)
                 mysql_conn.rollback()

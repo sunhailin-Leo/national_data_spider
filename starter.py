@@ -46,10 +46,6 @@ class Starter:
         # # MySQL
         self._mysql = Mysql(json_config=True).conn
         self._connect_info(conn_res=self._mysql, db_type="MySQL")
-        # 判断连接池的长度
-        if len(self.db_connect_pool) == 0:
-            logger.info("无数据源，无法存储.正在退出...")
-            sys.exit(1)
 
     def _connect_info(self, conn_res, db_type: str):
         """
@@ -67,6 +63,10 @@ class Starter:
             return False
 
     def command(self):
+        """
+        获取用户指令
+        :return: 无返回值
+        """
         try:
             opts, args = getopt.getopt(self._args, 'hc:i:', ["category=", "pid="])
         except getopt.GetoptError:
@@ -108,15 +108,19 @@ class Starter:
                 logger.error(err)
             else:
                 logger.info("分类总条数: %d 条" % len(result))
-                logger.info("爬取结束,数据开始入库...")
-                db = DBHandler(
-                    db_connect_pool=self.db_connect_pool,
-                    data_list=result,
-                    mgo_col_name="t_category",
-                    mysql_query="INSERT INTO t_category(category_name, category_id, category_parent, category_type) "
-                    "VALUES (%s, %s, %s, %s)"
-                )
-                db.insert_data()
+                if len(self.db_connect_pool) != 0:
+                    logger.info("爬取结束,数据开始入库...")
+                    db = DBHandler(
+                        db_connect_pool=self.db_connect_pool,
+                        data_list=result,
+                        mgo_col_name="t_category",
+                        mysql_query="INSERT INTO t_category(category_name, category_id, category_parent, category_type)"
+                        " VALUES (%s, %s, %s, %s)"
+                    )
+                    db.insert_data()
+                else:
+                    logger.info("导出到Excel中...")
+                    logger.info("功能待开发...敬请期待")
 
         else:
             logger.error("Data type is error!")
@@ -133,7 +137,24 @@ class Starter:
             logger.info("开始数据爬虫!...")
             self._data_spider = NationalDataWebsiteSpider(pid=pid,
                                                           data_type=data_type)
-            self._data_spider.start_spider()
+            try:
+                result = self._data_spider.start_spider()
+            except Exception as err:
+                logger.error(err)
+            else:
+                if len(self.db_connect_pool) != 0:
+                    logger.info("爬取结束开始入库...")
+                    db = DBHandler(
+                        db_connect_pool=self.db_connect_pool,
+                        data_list=result,
+                        mgo_col_name="t_year_data",
+                        mysql_query="INSERT INTO t_year_data(data_info, data_year, data_name, data_unit) "
+                                    "VALUES (%s, %s, %s, %s)"
+                    )
+                    db.insert_data()
+                else:
+                    logger.info("导出到Excel中...")
+                    logger.info("功能待开发...敬请期待")
         else:
             logger.error("Data type or pid is error!")
             sys.exit(1)

@@ -5,6 +5,9 @@
 <h3 id="Process">进度</h3>
 
 * 进度
+    * 2018-02-05
+        * 完成MySQL和MongoDB的写入方法可以将数据写入到数据库中
+
     * 2018-01-28
         * 临时在请求里面加了一个参数可以获取任意年份区间的数据
     
@@ -78,6 +81,7 @@
 <h3 id="Configuration">配置说明</h3>
 
 * 配置文件在conf文件夹中(可以完全自定义MySQL和MongoDB)
+* 默认开启MongoDB和MySQL的连接
 
 ---
 
@@ -92,4 +96,4 @@
 * ~~后续完善MongoDB数据库的连接使用~~
 * ~~开发MySQL的连接~~
 * 分类爬虫数据支持写入到excel导出(导出Excel这个待完成)
-* 数据爬虫的MySQL和MongoDB写入待完成
+* ~~数据爬虫的MySQL和MongoDB写入待完成~~

@@ -9,7 +9,7 @@ import json
 import logging
 import requests
 import urllib.parse as up
-from pymongo import MongoClient
+from collections import OrderedDict
 
 # 项目内部库
 from logger.LoggerHandler import Logger
@@ -137,17 +137,24 @@ class NationalDataWebsiteSpider:
             data_list.append(data['data']['data'])
         data_list = self._util.split_by_n(ls=data_list, group=len(name_list))
 
-        final = [{"name": name_list[i],
-                  "year": year_list,
-                  "data": data_list[i],
-                  "unit": unit_list[i]} for i in range(len(name_list))]
+        # 构建data_year映射
+        data_year = []
+        for each_data in data_list:
+            zip_data = OrderedDict(zip(year_list, each_data))
+            data_year.append([OrderedDict({"year": k, "value": v}) for (k, v) in zip_data.items()])
 
-        # 写进数据(暂时将数据库写入代码丢在这, MongoDB数据库连接类已经写好, 暂时还没使用)
-        conn = MongoClient(host="127.0.0.1", port=27017)
-        db = conn[self._db_name]
-        col = db[self._col_name]
-        for each_data in final:
-            col.insert(each_data)
+        # 两种数据返回
+        final_result_dict = [{"name": name_list[i],
+                              "data": data_year[i],
+                              "unit": unit_list[i]} for i in range(len(name_list))]
+
+        final_result_tuple = \
+            [[(data_list[i][j], year_list[j], name_list[i], unit_list[i])
+              for j in range(len(data_list[i]))]
+             for i in range(len(data_list))]
+
+        # 返回有点大，后续需要改进
+        return [final_result_dict, final_result_tuple]
 
     def start_spider(self):
         """
@@ -156,9 +163,4 @@ class NationalDataWebsiteSpider:
         """
         self._headers()
         self._request()
-        self._parse()
-
-
-if __name__ == '__main__':
-    national = NationalDataWebsiteSpider(pid='A0101', data_type='hgnd')
-    national.start_spider()
+        return self._parse()
